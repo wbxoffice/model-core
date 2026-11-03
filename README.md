@@ -8,7 +8,7 @@
 1. 建环境（每台机器一次）：Windows 双击 `setup_env.bat`，Mac 双击 `setup_env.command`。
    解释器路径写在 `python_env.txt`，每行一个，取本机第一个存在的。
 2. 把 TradingView 导出的文件放进 `exported data/`，包括 SPX 1D/30min/5min、US500 1D、VIX 1D 和 DIX。
-3. 双击 `start.bat`（Mac 用 `start.command`），按编号选功能。
+3. 双击 `start.bat`（Mac 用 `start.command`），按编号选功能。可以多选（如 `1 2` 表示先日跑、再开盘后趋势），按顺序执行；做完回到菜单，输入 0 退出。Sigma 分位已包含在日跑里。
 
 ## 功能与入口
 
