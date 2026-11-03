@@ -131,3 +131,28 @@ Thumbs.db
 !/us500_vdtr_v2/model/*.pkl
 !/remaining_trend_intraday/models/
 !/remaining_trend_intraday/models/*.pkl
+
+# 例外：数据文件夹说明（数据本身不进 git）
+!/data/
+/data/*
+!/data/README.md
+!/exported data/
+/exported data/*
+!/exported data/README.md
+
+# 例外：示例数据（合成）、公开的真实预测记录快照
+!/examples/
+!/examples/**
+!/history/
+!/history/**
+
+# 例外：开盘后趋势运行所需的阈值 / 评估文件（模型统计，非行情）
+!/remaining_trend_intraday/results/
+/remaining_trend_intraday/results/*
+!/remaining_trend_intraday/results/trend_after_open90_optimization_summary.csv
+!/remaining_trend_intraday/results/trend_after_open90_walkforward_30m_atr_augmented_threshold_scan.csv
+!/remaining_trend_intraday/results/trend_after_open90_walkforward_30m_atr_augmented_threshold_scan_30m.csv
+!/remaining_trend_intraday/results/trend_after_open90_walkforward_boosting_compare_predictions.csv
+!/remaining_trend_intraday/baseline/
+/remaining_trend_intraday/baseline/*
+!/remaining_trend_intraday/baseline/constraint_recommendation_latest.csv

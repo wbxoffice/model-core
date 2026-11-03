@@ -1,0 +1,3 @@
+﻿setup,label,status,model,threshold,precision_floor,recall_floor,precision,recall,accuracy,balanced_accuracy,pred_pos_ratio,non_trend_error_rate,tp,fp,fn,tn,current_model,current_threshold,current_precision,current_recall,delta_precision,delta_recall
+open90_recall,real_trend_remaining_after_open90,ok,rf_base,0.27,0.35,0.91453,0.35973597359735976,0.9316239316239316,0.5269320843091335,0.6529087400055142,0.7096018735362998,0.06451612903225806,109,194,8,116,rf_base,0.28,0.362712,0.91453,-0.0029760264026402194,0.01709393162393169
+close150_recall,real_trend_close150_after_open90,ok,rf_deeper,0.24,0.25,0.541667,0.25,0.6041666666666666,0.7517564402810304,0.6873076077396658,0.2716627634660422,0.06109324758842444,29,87,19,292,rf_deeper,0.26,0.25,0.541667,0.0,0.06249966666666662

@@ -5,10 +5,27 @@
 
 ## 快速开始
 
-1. 建环境（每台机器一次）：Windows 双击 `setup_env.bat`，Mac 双击 `setup_env.command`。
-   解释器路径写在 `python_env.txt`，每行一个，取本机第一个存在的。
-2. 把 TradingView 导出的文件放进 `exported data/`，包括 SPX 1D/30min/5min、US500 1D、VIX 1D 和 DIX。
-3. 双击 `start.bat`（Mac 用 `start.command`），按编号选功能。可以多选（如 `1 2` 表示先日跑、再开盘后趋势），按顺序执行；做完回到菜单，输入 0 退出。Sigma 分位已包含在日跑里。
+1. **建环境**（每台机器做一次）：Windows 双击 `setup_env.bat`，Mac 双击 `setup_env.command`。
+   - 需要先安装 Python 3.11。
+   - 解释器路径写在 `python_env.txt`，每行一个，程序取本机第一个存在的路径。
+2. **准备数据**，二选一：
+   - **先试用**：运行 `python tools/install_sample_data.py`，安装示例数据。示例数据是用真实行情统计特征生成的合成数据，不是真实报价，见 `examples/sample_data/README.md`。
+   - **正式使用**：每天把 TradingView 导出的文件放进 `exported data/`，包括 SPX 1D / 30min / 5min、US500 1D、VIX 1D 和 DIX。命名规则见 `exported data/README.md`。
+3. **运行**：双击 `start.bat`（Mac 用 `start.command`），按编号选择功能。
+   - 可以多选，例如输入 `1 2` 表示先跑日跑、再跑开盘后趋势，会按顺序执行。
+   - 跑完自动回到菜单，输入 0 退出。
+   - Sigma 分位已经包含在日跑里。
+
+仓库里各数据相关文件夹：
+
+| 文件夹 | 内容 |
+|---|---|
+| `data/` | 共享数据（日跑自动维护），见 `data/README.md` |
+| `exported data/` | 每天放 TradingView 导出文件，见其中 README |
+| `examples/sample_data/` | 示例数据（合成） |
+| `history/` | 真实历史预测记录快照（已去掉原始行情列），见 `history/README.md` |
+
+仓库里只有这些文件夹的说明和示例。真实行情数据和运行日志不上传。
 
 ## 功能与入口
 
