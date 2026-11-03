@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "projects": [
+    {
+      "name": "aio_v1",
+      "category": "daily_models",
+      "include_in_daily_pipeline": true,
+      "include_in_training": false,
+      "run_script": "run_all_models_and_log.py",
+      "strategy_script": "daily_meta_strategy_engine_v3.py",
+      "train_script": null,
+      "notes": "Frozen baseline, never retrained. Models converted from sklearn 1.1.3 pickles (tools/export_rf.py + rebuild_rf.py); predictions verified identical."
+    },
+    {
+      "name": "spx_vdtr_v2",
+      "category": "daily_models",
+      "include_in_daily_pipeline": true,
+      "include_in_training": true,
+      "run_script": "run_all_models_and_log_v2.py",
+      "strategy_script": "daily_meta_strategy_engine_v3.py",
+      "train_script": "train_all_models_v2.py"
+    },
+    {
+      "name": "us500_vdtr_v2",
+      "category": "daily_models",
+      "include_in_daily_pipeline": true,
+      "include_in_training": true,
+      "run_script": "run_all_models_and_log_v2.py",
+      "strategy_script": "daily_meta_strategy_engine_v3.py",
+      "train_script": "train_all_models_v2.py"
+    },
+    {
+      "name": "remaining_trend_intraday",
+      "category": "intraday_models",
+      "include_in_daily_pipeline": false,
+      "include_in_training": false,
+      "run_script": null,
+      "strategy_script": null,
+      "train_script": null,
+      "notes": "Post-open trend prediction; own entries trend_daily / trend_retrain / trend_evaluate in launcher_config.json."
+    }
+  ]
+}

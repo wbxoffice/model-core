@@ -1,0 +1,103 @@
+基础：SPX 波动 Regime 模型
+
+Regime 分档（按实际分布设计）
+Regime	条件（range）	定义	对应交易
+R0：低波动	< 0.8%	市场窄幅运行	卖跨 / 卖铁蝶 / 卖 vertical
+R1：中波动	0.8%–1.5%	正常日间波动	两边都不占优势，可减少仓位
+R2：高波动	> 1.5%	Trend 或大幅震荡日	买 gamma（0DTE 方向 / straddle）
+
+0.8% 是 SPX 平均内波动 ≈0.92% 的下分位
+1.5% 是 SPX 高频“大波动日”的自然分界
+
+>1.5% 的日子通常对应 ↗趋势 + dealer gamma 低，最适合做 0DTE 方向策略
+
+
+P_low ≥ 0.60 → SELL_GAMMA
+
+P_high ≥ 0.30 → BUY_GAMMA
+
+otherwise → NEUTRAL
+
+① Direction Model（方向模型 v1.0）
+
+预测：明天收盘涨 / 跌 / 中性
+只看 close_(t) → close_(t+1)
+
+标签：
+
++1 = Up
+
+0 = Neutral
+
+–1 = Down
+
+Neutral 阈值 ±0.2%
+
+P_up>0.5 或 P_down>0.5 强信号（0.45胜率已经很高）
+
+② Trend Model（趋势模型 v1.0）
+
+预测：明天是否“单边趋势日”
+
+趋势日定义（基于 daily 数据版本）：
+
+trend = 1 if abs(close_t+1 - open_t+1) > 0.6%  且方向一致
+trend = 0 otherwise
+
+P_trend ≥ 0.55  强信号
+
+③ Reversal Model（反转模型 v1.0）
+
+预测：明天是否是：
+
+高开低走（gap-up → red）
+
+低开高走（gap-down → green）
+
+标签定义：
+
+gap_up   = open_t+1 > close_t
+gap_down = open_t+1 < close_t
+
+close_red   = close_t+1 < open_t+1
+close_green = close_t+1 > open_t+1
+
+reversal = (gap_up & close_red) or (gap_down & close_green)
+
+P_rev ≥ 0.55 强信号
+
+模型之间是互补的
+
+我们最终会得到三条信号：
+
+模型	输出	帮你做什么
+v3.0 波动模型	明天是否大波动	Buy Gamma 或 Sell Gamma
+方向模型	涨 / 跌 / 中性	决定方向单腿或方向偏移
+趋势模型	是否趋势日	是否适合持仓到尾盘
+反转模型	是否反转日	是否在开盘后要找 pullback 反向入场
+
+
+
+0DTE 交易建议一句话版
+
+高波 + 趋势 + 向上 → “偏多 BUY_GAMMA（call spread）”
+
+低波 + 无趋势 → “SELL_GAMMA（iron condor）优先”
+
+高波 + 高反转概率 → “避免追开盘，等待 30–60min 结构再进场”
+
+
+
+🔧 方向模型可以使用与 v3.0 相同的特征（GEX / DIX / GEX ROC 等）
+
+事实上，方向预测对以下特征敏感：
+
+方向强相关特征（你已有的数据即可生成）：
+特征	对方向的意义
+GEX sign（正负方向）	负 GEX → dealer short gamma → 容易趋势
+GEX ROC（1d, 3d, 5d, 20d）	加速减仓 → 容易下跌；加速增加 → 容易上涨
+DIX（buying power proxy）	DIX 低 → 次日下跌概率更高
+DIX ROC	DIX 大跌 → 大概率第二天下跌
+Return_lag1-5	最近走势惯性
+Range（高低波）	大波动但收高常对应次日续涨/反转
+日历因子（dow, moy）	Monday mean-reversion, FOMC 周波动等

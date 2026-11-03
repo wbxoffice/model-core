@@ -1,0 +1,312 @@
+{
+  "_comment": "Model core 入口点唯一声明。平台启动器由 generate_platform_launchers.py 生成，禁止手改；改这里后重新运行生成器。执行引擎见 shared/launch.py；解释器见 python_env.txt。",
+  "entries": {
+    "menu": {
+      "dir": ".",
+      "mode": "console",
+      "steps": [
+        {
+          "id": "menu",
+          "title": "Model core 菜单",
+          "script": "menu.py"
+        }
+      ],
+      "launchers": {
+        "bat": "start.bat",
+        "command": "start.command",
+        "sh": "start_mac.sh"
+      }
+    },
+    "run_prediction_all_models": {
+      "dir": ".",
+      "mode": "runlog",
+      "steps": [
+        {
+          "id": "step0",
+          "title": "Precheck exported data manifest...",
+          "script": "precheck_exported_manifest.py",
+          "args": [
+            "--root",
+            "{ROOT}"
+          ],
+          "error_message": "[ABORT] 导出清单不完整且未确认继续。请等 OneDrive 同步齐或补导出后重试(或用 --allow-incomplete 强制)。"
+        },
+        {
+          "id": "step1",
+          "title": "Update + Sync + Run + Aggregate...",
+          "script": "sync_run_and_aggregate_projects.py",
+          "args": [
+            "--root",
+            "{ROOT}",
+            "--python",
+            "{PY}"
+          ]
+        },
+        {
+          "id": "step2",
+          "title": "Run next-day similarity path predictor...",
+          "script": "predict_nextday_similarity_path.py",
+          "args": [
+            "--root",
+            "{ROOT}"
+          ]
+        },
+        {
+          "id": "step3",
+          "title": "Sigma levels (next trading day)...",
+          "script": "sigma_levels.py",
+          "args": [
+            "--root",
+            "{ROOT}"
+          ]
+        }
+      ],
+      "outputs": [
+        "prediction_log_all_models.xlsx",
+        "summary_all_projects.txt",
+        "strategy_all_projects.txt",
+        "log/nextday_similarity/nextday_similarity_results.json",
+        "log/sigma_levels/"
+      ],
+      "launchers": {
+        "bat": "run_prediction_all models.bat",
+        "command": "run_prediction_all_models.command",
+        "sh": "run_prediction_all_models_mac.sh"
+      }
+    },
+    "trend_daily": {
+      "dir": "remaining_trend_intraday",
+      "mode": "console",
+      "steps": [
+        {
+          "id": "prepare",
+          "title": "Update exported daily files and sync daily feature sources",
+          "script": "scripts/prepare_daily_sources_for_trend.py",
+          "error_message": "[ERROR] prepare_daily_sources_for_trend failed."
+        },
+        {
+          "id": "detect",
+          "title": "Detect selected intraday source timeframe",
+          "python_code": "import sys; from pathlib import Path; sys.path.insert(0, str((Path.cwd() / 'scripts').resolve())); import train_trend_after_open90_experiment as tr; p = tr._discover_intraday_file(); n = p.name.lower(); is30 = (', 30' in n) or (',30' in n) or ('_30' in n); print(f'[INFO] Intraday source: {p}'); sys.exit(2 if is30 else 0)",
+          "allow_exit": [
+            0,
+            2
+          ],
+          "error_message": "[ERROR] intraday source detect failed."
+        },
+        {
+          "id": "merge",
+          "title": "Incremental merge SPX 5min sources (5min only)",
+          "script": "scripts/merge_spx_5min_sources_incremental.py",
+          "skip_if": {
+            "step": "detect",
+            "exit": 2,
+            "message": "[INFO] 30min source detected. Skip merge_spx_5min_sources."
+          },
+          "error_message": "[ERROR] merge_spx_5min_sources_incremental failed."
+        },
+        {
+          "id": "predict",
+          "title": "Run daily trend mode prediction (open90 -> remaining/close150)",
+          "script": "scripts/run_trend_modes_daily.py",
+          "error_message": "[ERROR] run_trend_modes_daily failed."
+        }
+      ],
+      "ok_message": "[OK] trend mode prediction finished.",
+      "launchers": {
+        "bat": "remaining_trend_intraday/run_trend_modes_daily.bat",
+        "command": "remaining_trend_intraday/run_trend_modes_daily.command",
+        "sh": "remaining_trend_intraday/run_trend_modes_daily.sh"
+      }
+    },
+    "sigma_levels": {
+      "dir": ".",
+      "mode": "console",
+      "banner": [
+        "Sigma 分位：生成下一交易日的分位表(xlsx)与阶梯图(png)。",
+        "指定适用交易日请在命令行运行：python sigma_levels.py --root . --date YYYY-MM-DD"
+      ],
+      "steps": [
+        {
+          "id": "sigma",
+          "title": "Sigma levels",
+          "script": "sigma_levels.py",
+          "args": [
+            "--root",
+            "{ROOT}",
+            "--no-append"
+          ]
+        }
+      ],
+      "ok_message": "[OK] 见 log/sigma_levels/",
+      "launchers": {
+        "bat": "sigma_levels.bat",
+        "command": "sigma_levels.command",
+        "sh": "sigma_levels_mac.sh"
+      }
+    },
+    "train_all_projects": {
+      "dir": ".",
+      "mode": "console",
+      "banner": [
+        "[INFO] Excluded by default: aio_v1"
+      ],
+      "env_flags": {
+        "INSTALL_REQUIREMENTS": "--install_requirements",
+        "DRY_RUN": "--dry_run"
+      },
+      "steps": [
+        {
+          "id": "train",
+          "title": "Train all projects",
+          "script": "train_all_projects.py",
+          "args": [
+            "--root",
+            "{ROOT}",
+            "--python",
+            "{PY}"
+          ],
+          "append_env_flags": true
+        }
+      ],
+      "launchers": {
+        "bat": "train_all_projects.bat",
+        "command": "train_all_projects.command",
+        "sh": "train_all_projects_mac.sh"
+      }
+    },
+    "trend_retrain": {
+      "dir": "remaining_trend_intraday",
+      "mode": "console",
+      "steps": [
+        {
+          "id": "merge30",
+          "title": "Merge local/main 30min sources before retrain",
+          "script": "scripts/merge_spx_30min_training_source.py",
+          "error_message": "[ERROR] merge_spx_30min_training_source failed."
+        },
+        {
+          "id": "check_merged",
+          "check_file": "data/SP_SPX, 30_merged.csv",
+          "error_message": "[ERROR] merged train source file missing: data/SP_SPX, 30_merged.csv"
+        },
+        {
+          "id": "precheck",
+          "title": "Retrain precheck (source file and sample stats)",
+          "script": "scripts/train_trend_after_open90_experiment.py",
+          "args": [
+            "--precheck",
+            "--spx5m_file",
+            "{ROOT}/data/SP_SPX, 30_merged.csv"
+          ],
+          "error_message": "[ERROR] retrain precheck failed."
+        },
+        {
+          "id": "train",
+          "title": "Retraining trend models",
+          "script": "scripts/train_trend_after_open90_experiment.py",
+          "args": [
+            "--spx5m_file",
+            "{ROOT}/data/SP_SPX, 30_merged.csv"
+          ],
+          "error_message": "[ERROR] retrain_trend_models failed during training."
+        }
+      ],
+      "ok_message": "[OK] trend models retraining finished.",
+      "launchers": {
+        "bat": "remaining_trend_intraday/retrain_trend_models.bat",
+        "command": "remaining_trend_intraday/retrain_trend_models.command",
+        "sh": "remaining_trend_intraday/retrain_trend_models.sh"
+      }
+    },
+    "models_evaluation": {
+      "dir": ".",
+      "mode": "console",
+      "banner": [
+        "===========================================",
+        "Model Evaluation Usage",
+        "===========================================",
+        "1) Script will first show each model sheet:",
+        "   - available days",
+        "   - date range",
+        "   - missing business days (approx)",
+        "2) After selecting sheet, input window days:",
+        "   - integer (e.g. 30)",
+        "   - max = use all available days",
+        "   - Enter = default 30 days",
+        "==========================================="
+      ],
+      "steps": [
+        {
+          "id": "evaluate",
+          "title": "Model evaluation (interactive)",
+          "script": "evaluate_prediction_log_all_models.py",
+          "args": []
+        }
+      ],
+      "launchers": {
+        "bat": "models evaluation.bat",
+        "command": "models_evaluation.command",
+        "sh": "models_evaluation_mac.sh"
+      }
+    },
+    "trend_evaluate": {
+      "dir": "remaining_trend_intraday",
+      "mode": "console",
+      "steps": [
+        {
+          "id": "evaluate",
+          "title": "Evaluate trend mode predictions (window=all)",
+          "script": "scripts/evaluate_trend_mode_predictions.py",
+          "args": [
+            "--window",
+            "all"
+          ],
+          "error_message": "[ERROR] evaluate_trend_mode_predictions failed."
+        }
+      ],
+      "ok_message": "[OK] evaluation finished. See remaining_trend_intraday/evaluation/",
+      "launchers": {
+        "bat": "remaining_trend_intraday/evaluate_trend_mode_predictions.bat",
+        "command": "remaining_trend_intraday/evaluate_trend_mode_predictions.command",
+        "sh": "remaining_trend_intraday/evaluate_trend_mode_predictions.sh"
+      }
+    },
+    "log_organizer": {
+      "dir": ".",
+      "mode": "console",
+      "steps": [
+        {
+          "id": "preview",
+          "title": "Dry-run preview",
+          "script": "log_organizer.py",
+          "args": [
+            "--root",
+            "{ROOT}",
+            "--keep_latest",
+            "1"
+          ],
+          "error_message": "[ERR] dry-run failed."
+        },
+        {
+          "id": "execute",
+          "title": "Execute log organizing",
+          "script": "log_organizer.py",
+          "args": [
+            "--root",
+            "{ROOT}",
+            "--keep_latest",
+            "1",
+            "--execute",
+            "--prune_small_files"
+          ]
+        }
+      ],
+      "launchers": {
+        "bat": "log_organizer.bat",
+        "command": "log_organizer.command",
+        "sh": "log_organizer_mac.sh"
+      }
+    }
+  }
+}

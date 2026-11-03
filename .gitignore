@@ -1,0 +1,133 @@
+# Model core：git 只管代码、配置和文档。
+# 数据、日志、生成的表格/图片随 OneDrive 同步，不进 git（也避免把行情数据和本机路径传上 GitHub）；当前使用的模型例外（见文末）。
+
+# 本机私有设置（账户资金等）
+local_settings.json
+
+
+# History and backups
+History/
+**/History/
+**/history/
+**/archive/
+**/archives/
+**/archive*/
+**/backup/
+**/backups/
+**/old version/
+**/past/
+data backup/
+
+# Runtime and source data
+data/
+**/data/
+exported data/
+**/exported data/
+
+# Logs and generated evaluation outputs
+log/
+**/log/
+logs/
+**/logs/
+outputs/
+**/outputs/
+results/
+**/results/
+backtest/
+**/backtest/
+baseline/
+**/baseline/
+reports/
+**/reports/
+features/
+**/features/
+model evaluation/
+**/model evaluation/
+stat/
+**/stat/
+**/strategy PnL analysis done/
+**/STRATEGY PnL backtest/
+
+# Trained model artifacts and model directories
+model/
+**/model/
+models/
+**/models/
+*.pkl
+*.pickle
+*.joblib
+*.h5
+*.hdf5
+*.onnx
+*.pt
+*.pth
+*.keras
+
+# Generated parent-level aggregate files
+/prediction_log_all_models.xlsx
+/summary_all_projects.txt
+/strategy_all_projects.txt
+/ARCHITECTURE_REVIEW_*.html
+
+# Generated datasets, charts, reports, and packaged artifacts
+*.csv
+*.xlsx
+*.xls
+*.xlsm
+*.jsonl
+*.png
+*.jpg
+*.jpeg
+*.svg
+*.webp
+*.pdf
+*.docx
+*.zip
+*.tar
+*.gz
+
+# Python caches and virtual environments at any depth
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.venv/
+**/.venv/
+**/.venv_*/
+venv/
+**/venv/
+env/
+**/env/
+
+# Tool worktrees and local memory
+.claude/
+.codex/
+
+# IDE and OS files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Temporary and generated office files
+~$*.xlsx
+~$*.xls
+~$*.docx
+*.tmp
+*.temp
+
+# Nested standalone repositories
+**/.git/
+
+# 例外：当前使用的模型随仓库发布（新机器 clone 后只需补数据）
+!/aio_v1/model/
+!/aio_v1/model/*.pkl
+!/spx_vdtr_v2/model/
+!/spx_vdtr_v2/model/*.pkl
+!/us500_vdtr_v2/model/
+!/us500_vdtr_v2/model/*.pkl
+!/remaining_trend_intraday/models/
+!/remaining_trend_intraday/models/*.pkl

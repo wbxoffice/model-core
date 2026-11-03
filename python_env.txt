@@ -1,0 +1,4 @@
+# Model core 统一解释器（launch.py 取本机第一个存在的路径；都不存在则用启动它的 python）
+# 环境创建：Windows 运行 setup_env.bat，Mac 运行 setup_env.command（按 requirements.txt 固定版本）
+E:\venvs\model_core\Scripts\python.exe
+~/venvs/model_core/bin/python
