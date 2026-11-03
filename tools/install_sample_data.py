@@ -4,8 +4,8 @@
 把 examples/sample_data/ 里的示例数据（真实数据校准的合成数据，不是真实报价）安装到程序需要的各个位置，
 让刚 clone 的新机器可以直接跑通 日跑 / 开盘后趋势 / Sigma 分位 / 训练 / 回顾。
 
-- 日期平移：整段示例按交易日顺序平移，使最后一天 = 最近一个已收盘的 NYSE 交易日（按美东时间），
-  这样日跑开跑前的导出体检不会因为"数据过旧"拦下。
+- 日期平移：整段示例按交易日顺序平移，使最后一天 = 美西时间今天及以前的最后一个 NYSE 开市日
+  （与日跑导出体检同一口径），这样体检不会因为"数据过旧"拦下。
 - 不覆盖已有文件（已有真实数据时只补缺）；加 --force 才覆盖。
 - 同时在 exported data/ 放一份"导出样例"，演示 TradingView 导出文件的命名和格式（日跑会把它导入并删除）。
 
@@ -26,19 +26,15 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "examples" / "sample_data"
-NY = ZoneInfo("America/New_York")
 LA = "America/Los_Angeles"
 LATEST_DAYS = 300
 EXPORT_BARS = 300
 
 
-def latest_closed_day(open_days: pd.DatetimeIndex) -> pd.Timestamp:
-    now = datetime.now(NY)
-    today = pd.Timestamp(now.date())
-    past = open_days[open_days < today]
-    if today in open_days and now.hour >= 16:
-        return today
-    return past[-1]
+def expected_latest_day(open_days: pd.DatetimeIndex) -> pd.Timestamp:
+    """与日跑导出体检(precheck)同一口径：美西时间今天及以前的最后一个开市日。"""
+    today = pd.Timestamp(datetime.now(ZoneInfo(LA)).date())
+    return open_days[open_days <= today][-1]
 
 
 def iso_pt(dates: pd.Series, tod: pd.Series) -> pd.Series:
@@ -57,7 +53,7 @@ def main() -> int:
 
     spx = pd.read_csv(SRC / "data" / "SP_SPX, 1D.csv")
     old_days = pd.DatetimeIndex(pd.to_datetime(spx["time"]))
-    end = latest_closed_day(open_days)
+    end = expected_latest_day(open_days)
     new_days = open_days[open_days <= end][-len(old_days):]
     if len(new_days) != len(old_days):
         raise SystemExit("[ERR] nyse_open_days.csv 交易日不够，先运行 generate_nyse_open_days.py 扩展日历")
