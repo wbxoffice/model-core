@@ -55,10 +55,10 @@ def main() -> int:
             continue
         for n in picks:
             name, entry, _ = MENU[n - 1]
-            print(f"\n>>> [{n}] {name}")
+            print(f"\n>>> [{n}] {name}", flush=True)
             last_rc = subprocess.call([sys.executable, str(ROOT / "shared" / "launch.py"), entry])
             if last_rc != 0:
-                print(f"[ERR] [{n}] {name} 失败（return_code={last_rc}），后续所选项已跳过。")
+                print(f"[ERR] [{n}] {name} 失败（return_code={last_rc}），后续所选项已跳过。", flush=True)
                 break
         print()
 
